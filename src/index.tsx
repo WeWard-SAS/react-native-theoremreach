@@ -1,9 +1,7 @@
-import { NativeModules } from 'react-native';
+import { NativeEventEmitter, NativeModules } from 'react-native';
 
-type TheoremreachType = {
-  multiply(a: number, b: number): Promise<number>;
-};
+const { RNTheoremReach } = NativeModules;
+const TheoremReachEventEmitter = new NativeEventEmitter(RNTheoremReach);
 
-const { Theoremreach } = NativeModules;
-
-export default Theoremreach as TheoremreachType;
+export default RNTheoremReach;
+export { TheoremReachEventEmitter };
