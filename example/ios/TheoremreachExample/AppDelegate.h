@@ -1,19 +1,15 @@
-#!/usr/bin/env node
 /**
  * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
- * @format
  */
 
-'use strict';
+#import <React/RCTBridgeDelegate.h>
+#import <UIKit/UIKit.h>
 
-var cli = require('@react-native-community/cli');
+@interface AppDelegate : UIResponder <UIApplicationDelegate, RCTBridgeDelegate>
 
-if (require.main === module) {
-  cli.run();
-}
+@property (nonatomic, strong) UIWindow *window;
 
-module.exports = cli;
+@end
