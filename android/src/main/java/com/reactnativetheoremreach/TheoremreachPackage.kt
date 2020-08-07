@@ -10,11 +10,11 @@ import com.facebook.react.uimanager.ViewManager
 import com.facebook.react.bridge.JavaScriptModule
 
 class TheoremreachPackage : ReactPackage {
-    override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
+        override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
         return Arrays.asList<NativeModule>(TheoremreachModule(reactContext))
-    }
+        }
 
-    override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
+        override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
         return emptyList<ViewManager<*, *>>()
-    }
+        }
 }

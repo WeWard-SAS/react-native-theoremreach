@@ -1,24 +1,85 @@
 package com.reactnativetheoremreach
 
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.Promise
+import androidx.annotation.Nullable
+import com.facebook.react.bridge.*
+import com.facebook.react.modules.core.RCTNativeAppEventEmitter
 
-class TheoremreachModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+import theoremreach.com.theoremreach.TheoremReach
+import theoremreach.com.theoremreach.TheoremReachRewardListener
+import theoremreach.com.theoremreach.TheoremReachSurveyAvailableListener
+import theoremreach.com.theoremreach.TheoremReachSurveyListener
 
+
+class TheoremreachModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), LifecycleEventListener, TheoremReachRewardListener, TheoremReachSurveyListener, TheoremReachSurveyAvailableListener {
+    private var isAppInitialized = false
     override fun getName(): String {
-        return "Theoremreach"
+        return "RNTheoremReach"
     }
 
-    // Example method
-    // See https://facebook.github.io/react-native/docs/native-modules-android
     @ReactMethod
-    fun multiply(a: Int, b: Int, promise: Promise) {
-    
-      promise.resolve(a * b)
-    
+    fun initWithApiKeyAndUserId(apiKey: String?, userId: String?) {
+        TheoremReach.initWithApiKeyAndUserIdAndActivityContext(apiKey, userId, currentActivity)
+
+        // The below code is required because onResume is called before this method by default
+        // and it should be prevented for the correct working of the SDK
+        TheoremReach.getInstance().onResume(currentActivity)
+        isAppInitialized = true
+        TheoremReach.getInstance().setTheoremReachRewardListener(this)
+        TheoremReach.getInstance().setTheoremReachSurveyListener(this)
+        TheoremReach.getInstance().setTheoremReachSurveyAvailableListener(this)
     }
 
-    
+    @ReactMethod
+    fun showRewardCenter() {
+        TheoremReach.getInstance().showRewardCenter()
+    }
+
+    @ReactMethod
+    fun isSurveyAvailable(cb: Callback) {
+        cb.invoke(TheoremReach.getInstance().isSurveyAvailable())
+    }
+
+    /* Callbacks */
+    private fun sendEvent(reactContext: ReactContext,
+                          eventName: String,
+                          @Nullable params: Any?) {
+        reactContext
+                .getJSModule(RCTNativeAppEventEmitter::class.java)
+                .emit(eventName, params)
+    }
+
+    override fun theoremreachSurveyAvailable(surveyAvailable: Boolean) {
+        sendEvent(reactContext, "theoremreachSurveyAvailable", surveyAvailable)
+    }
+
+    override fun onReward(quantity: Int) {
+        sendEvent(reactContext, "onReward", quantity)
+    }
+
+    override fun onRewardCenterOpened() {
+        sendEvent(reactContext, "onRewardCenterOpened", null)
+    }
+
+    override fun onRewardCenterClosed() {
+        sendEvent(reactContext, "onRewardCenterClosed", null)
+    }
+
+    /* Lifecycle methods */
+    override fun onHostResume() {
+        if (isAppInitialized) {
+            TheoremReach.getInstance().onResume(currentActivity)
+        }
+    }
+
+    override fun onHostPause() {
+        TheoremReach.getInstance().onPause()
+    }
+
+    override fun onHostDestroy() {
+        // Actvity `onDestroy`
+    }
+
+    init {
+        reactContext.addLifecycleEventListener(this)
+    }
 }
